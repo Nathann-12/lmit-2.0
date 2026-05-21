@@ -1,0 +1,9 @@
+/* Smooth scrolling for the entire page */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Custom styles for the research lab website */
+.App {
+    min-height: 100vh;
+}

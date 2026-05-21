@@ -1,0 +1,12 @@
+**/.git
+**/.venv
+**/venv
+**/node_modules
+**/__pycache__
+**/.env
+**/.env.*
+**/test_reports
+**/memory
+**/.emergent
+*.md
+!README.md
