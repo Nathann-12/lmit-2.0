@@ -82,9 +82,8 @@ const Footer = () => {
                 <Twitter size={20} />
               </a>
             </div>
-            <p className="text-gray-300 text-sm">
-              Department of Materials Science<br />
-              University Research Building, Suite 301
+            <p className="text-gray-300 text-sm leading-relaxed">
+              Special Research Unit of Sensors and Intelligent Systems for Agriculture, Food, and Environment
             </p>
           </div>
         </div>
