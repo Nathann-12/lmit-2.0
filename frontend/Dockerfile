@@ -2,6 +2,10 @@ FROM node:20-alpine AS build
 
 WORKDIR /app
 
+# Add ARG and ENV for the backend URL so it is available during the build step
+ARG REACT_APP_BACKEND_URL
+ENV REACT_APP_BACKEND_URL=$REACT_APP_BACKEND_URL
+
 COPY package.json ./
 
 RUN npm install --legacy-peer-deps && npm install ajv@^8 --legacy-peer-deps

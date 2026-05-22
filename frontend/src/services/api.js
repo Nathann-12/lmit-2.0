@@ -1,6 +1,9 @@
 import axios from 'axios';
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || '';
+if (!process.env.REACT_APP_BACKEND_URL) {
+  console.error("REACT_APP_BACKEND_URL is not defined! Ensure environment variables are set correctly during build.");
+}
 const API = `${BACKEND_URL}/api`;
 
 const apiClient = axios.create({
@@ -19,9 +22,16 @@ apiClient.interceptors.request.use((config) => {
   return config;
 });
 
-// On 401, clear token and redirect to login
+// Intercept responses to handle auth errors and invalid HTML responses (e.g. Nginx 404 fallback)
 apiClient.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    // If we receive an HTML string when we expect JSON, the API URL is likely incorrect
+    if (typeof response.data === 'string' && response.data.trim().toLowerCase().startsWith('<!doctype html>')) {
+      console.error("API Error: Received HTML instead of JSON. Check the REACT_APP_BACKEND_URL environment variable.");
+      return Promise.reject(new Error("Invalid API response (received HTML)."));
+    }
+    return response;
+  },
   (error) => {
     if (error.response?.status === 401) {
       const isAdminRoute = window.location.pathname.startsWith('/admin');
