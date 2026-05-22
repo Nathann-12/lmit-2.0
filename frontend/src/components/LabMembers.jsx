@@ -95,11 +95,10 @@ const LabMembers = () => {
                       )}
                       <a
                         href={`mailto:${member.email}`}
-                        className="text-slate-600 hover:text-teal-600 transition-colors duration-200"
-                        aria-label="Email"
+                        className="text-sm text-slate-600 hover:text-teal-600 transition-colors duration-200 truncate"
                         data-testid={`member-email-${member.id}`}
                       >
-                        <Mail size={18} />
+                        {member.email}
                       </a>
                       <a
                         href={member.linkedin}
