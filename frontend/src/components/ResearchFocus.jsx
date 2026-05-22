@@ -7,6 +7,7 @@ import { labApi } from '../services/api';
 const ResearchFocus = () => {
   const [researchFocus, setResearchFocus] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [visibleCount, setVisibleCount] = useState(6);
 
   useEffect(() => {
     labApi.getResearchFocus()
@@ -34,44 +35,57 @@ const ResearchFocus = () => {
             <Loader2 className="w-12 h-12 text-teal-600 animate-spin" />
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {researchFocus.map((focus) => (
-              <Card 
-                key={focus.id} 
-                data-testid={`research-card-${focus.id}`}
-                className="group overflow-hidden border-gray-200 hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
-              >
-                <div className="relative h-64 overflow-hidden">
-                  <img
-                    src={focus.image}
-                    alt={focus.title}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent"></div>
-                  <h3 className="absolute bottom-4 left-4 text-2xl font-bold text-white">
-                    {focus.title}
-                  </h3>
-                </div>
-
-                <CardContent className="p-6">
-                  <p className="text-slate-600 mb-4 leading-relaxed">
-                    {focus.description}
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {focus.keywords.map((keyword, index) => (
-                      <Badge 
-                        key={index} 
-                        variant="secondary" 
-                        className="bg-teal-50 text-teal-700 hover:bg-teal-100 transition-colors duration-200"
-                      >
-                        {keyword}
-                      </Badge>
-                    ))}
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {researchFocus.slice(0, visibleCount).map((focus) => (
+                <Card 
+                  key={focus.id} 
+                  data-testid={`research-card-${focus.id}`}
+                  className="group overflow-hidden border-gray-200 hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+                >
+                  <div className="relative h-64 overflow-hidden">
+                    <img
+                      src={focus.image}
+                      alt={focus.title}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent"></div>
+                    <h3 className="absolute bottom-4 left-4 text-2xl font-bold text-white">
+                      {focus.title}
+                    </h3>
                   </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+
+                  <CardContent className="p-6">
+                    <p className="text-slate-600 mb-4 leading-relaxed">
+                      {focus.description}
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {focus.keywords.map((keyword, index) => (
+                        <Badge 
+                          key={index} 
+                          variant="secondary" 
+                          className="bg-teal-50 text-teal-700 hover:bg-teal-100 transition-colors duration-200"
+                        >
+                          {keyword}
+                        </Badge>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            {visibleCount < researchFocus.length && (
+              <div className="flex justify-center mt-12">
+                <button 
+                  onClick={() => setVisibleCount(prev => prev + 6)}
+                  className="px-8 py-3 bg-white border-2 border-teal-600 text-teal-600 font-semibold rounded-full hover:bg-teal-50 transition-colors duration-300"
+                >
+                  Load More Research
+                </button>
+              </div>
+            )}
+          </>
         )}
       </div>
     </section>
