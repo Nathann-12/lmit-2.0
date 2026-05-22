@@ -144,6 +144,8 @@ class LabMember(BaseModel):
     linkedin: str
     scholar: str
     cv_url: str = ""
+    is_alumni: bool = False
+    current_workplace: str = ""
 
 
 class LabMemberInput(BaseModel):
@@ -156,6 +158,8 @@ class LabMemberInput(BaseModel):
     linkedin: str = "#"
     scholar: str = "#"
     cv_url: str = ""
+    is_alumni: bool = False
+    current_workplace: str = ""
 
 
 class YoutubeVideo(BaseModel):
@@ -274,6 +278,8 @@ async def get_lab_members():
     items = await db.lab_members.find({}, {"_id": 0}).sort("id", 1).to_list(100)
     for item in items:
         item.setdefault("cv_url", "")
+        item.setdefault("is_alumni", False)
+        item.setdefault("current_workplace", "")
     return items
 
 

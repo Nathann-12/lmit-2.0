@@ -261,8 +261,38 @@ async def seed_database():
     print(f"Inserted {len(PUBLICATIONS)} publications")
     
     # Insert lab members
-    await db.lab_members.insert_many([dict(item) for item in LAB_MEMBERS])
-    print(f"Inserted {len(LAB_MEMBERS)} lab members")
+    ALUMNI = [
+        {
+            "id": 7,
+            "name": "Dr. Sarah Connor",
+            "title": "Former Postdoctoral Researcher",
+            "image": "",
+            "bio": "",
+            "research": [],
+            "email": "sarah@example.com",
+            "linkedin": "",
+            "scholar": "",
+            "cv_url": "",
+            "is_alumni": True,
+            "current_workplace": "Senior Scientist at Google"
+        },
+        {
+            "id": 8,
+            "name": "James Smith",
+            "title": "Former MSc Student",
+            "image": "",
+            "bio": "",
+            "research": [],
+            "email": "james@example.com",
+            "linkedin": "",
+            "scholar": "",
+            "cv_url": "",
+            "is_alumni": True,
+            "current_workplace": "Engineer at NASA JPL"
+        }
+    ]
+    await db.lab_members.insert_many([dict(item) for item in LAB_MEMBERS] + [dict(item) for item in ALUMNI])
+    print(f"Inserted {len(LAB_MEMBERS) + len(ALUMNI)} lab members")
     
     # Insert news
     await db.news.insert_many([dict(item) for item in NEWS])

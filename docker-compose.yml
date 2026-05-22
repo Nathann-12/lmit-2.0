@@ -20,13 +20,15 @@ services:
     depends_on:
       mongo:
         condition: service_healthy
-    expose:
-      - "8000"
+    ports:
+      - "10000:10000"
 
   web:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      args:
+        - REACT_APP_BACKEND_URL=http://localhost:10000
     restart: unless-stopped
     ports:
       - "${HTTP_PORT:-8080}:80"

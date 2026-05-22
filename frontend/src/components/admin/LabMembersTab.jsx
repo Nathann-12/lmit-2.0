@@ -6,13 +6,13 @@ import { Textarea } from '../ui/textarea';
 import { Card, CardContent } from '../ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '../ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '../ui/alert-dialog';
-import { Plus, Pencil, Trash2, Loader2 } from 'lucide-react';
+import { Plus, Pencil, Trash2, Loader2, GraduationCap } from 'lucide-react';
 import { labApi, adminApi, formatApiErrorDetail } from '../../services/api';
 import ImageUploader from '../ImageUploader';
 import CvUploader from '../CvUploader';
 import { toast } from 'sonner';
 
-const empty = { name: '', title: '', image: '', bio: '', research: '', email: '', linkedin: '#', scholar: '#', cv_url: '' };
+const empty = { name: '', title: '', image: '', bio: '', research: '', email: '', linkedin: '#', scholar: '#', cv_url: '', is_alumni: false, current_workplace: '' };
 
 const LabMembersTab = () => {
   const [items, setItems] = useState([]);
@@ -93,13 +93,21 @@ const LabMembersTab = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {items.map((m) => (
-            <Card key={m.id} className="border-gray-200 overflow-hidden" data-testid={`member-admin-card-${m.id}`}>
-              <div className="h-48 bg-gray-100 overflow-hidden">
-                <img src={m.image} alt={m.name} className="w-full h-full object-cover" />
+            <Card key={m.id} className={`border-gray-200 overflow-hidden relative ${m.is_alumni ? 'opacity-70' : ''}`} data-testid={`member-admin-card-${m.id}`}>
+              {m.is_alumni && (
+                <div className="absolute top-2 right-2 bg-slate-800 text-white text-xs px-2 py-1 rounded-full flex items-center z-10 shadow-sm">
+                  <GraduationCap className="w-3 h-3 mr-1" /> Alumni
+                </div>
+              )}
+              <div className="h-48 bg-gray-100 overflow-hidden relative">
+                <img src={m.image} alt={m.name} className={`w-full h-full object-cover ${m.is_alumni ? 'grayscale' : ''}`} />
               </div>
               <CardContent className="p-4">
                 <h3 className="font-semibold text-slate-800">{m.name}</h3>
                 <p className="text-sm text-teal-600 mb-2">{m.title}</p>
+                {m.is_alumni && m.current_workplace && (
+                  <p className="text-xs text-slate-600 mb-2 font-medium">🏢 {m.current_workplace}</p>
+                )}
                 <p className="text-xs text-slate-500 mb-3 line-clamp-2">{m.bio}</p>
                 <div className="flex gap-2">
                   <Button size="sm" variant="outline" onClick={() => openEdit(m)} data-testid={`edit-member-${m.id}`} className="flex-1">
@@ -124,30 +132,59 @@ const LabMembersTab = () => {
             <DialogTitle>{editing ? 'Edit Lab Member' : 'Add Lab Member'}</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4">
+            
+            <div className="bg-slate-50 p-4 rounded-lg border border-slate-200 space-y-4 mb-4">
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="is_alumni"
+                  checked={form.is_alumni}
+                  onChange={(e) => setForm({ ...form, is_alumni: e.target.checked })}
+                  className="w-4 h-4 text-teal-600 bg-gray-100 border-gray-300 rounded focus:ring-teal-500"
+                />
+                <Label htmlFor="is_alumni" className="font-semibold text-slate-700 cursor-pointer">
+                  This person is an Alumni (Old Member)
+                </Label>
+              </div>
+              
+              {form.is_alumni && (
+                <div className="pl-6 animate-in slide-in-from-top-2 duration-200">
+                  <Label className="mb-2 block">Current Workplace</Label>
+                  <Input 
+                    value={form.current_workplace || ''} 
+                    onChange={(e) => setForm({ ...form, current_workplace: e.target.value })} 
+                    placeholder="e.g. Google, MIT, NASA" 
+                    className="bg-white"
+                  />
+                  <p className="text-xs text-slate-500 mt-1">For alumni, we typically only show their name and workplace.</p>
+                </div>
+              )}
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label className="mb-2 block">Name</Label>
                 <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required data-testid="member-name-input" />
               </div>
               <div>
-                <Label className="mb-2 block">Title</Label>
+                <Label className="mb-2 block">Title / Previous Title</Label>
                 <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required placeholder="Principal Investigator" />
               </div>
             </div>
             <div>
               <ImageUploader
-                label="Photo"
+                label="Photo (Optional for Alumni)"
                 value={form.image}
                 onChange={(v) => setForm({ ...form, image: v })}
               />
             </div>
             <div>
               <Label className="mb-2 block">Bio</Label>
-              <Textarea value={form.bio} onChange={(e) => setForm({ ...form, bio: e.target.value })} required rows={3} />
+              <Textarea value={form.bio} onChange={(e) => setForm({ ...form, bio: e.target.value })} required={!form.is_alumni} rows={3} />
             </div>
             <div>
               <Label className="mb-2 block">Research Interests (comma-separated)</Label>
-              <Input value={form.research} onChange={(e) => setForm({ ...form, research: e.target.value })} required placeholder="Nanotechnology, Gas sensors, AI" />
+              <Input value={form.research} onChange={(e) => setForm({ ...form, research: e.target.value })} required={!form.is_alumni} placeholder="Nanotechnology, Gas sensors, AI" />
             </div>
             <div>
               <CvUploader
@@ -159,7 +196,7 @@ const LabMembersTab = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <Label className="mb-2 block">Email</Label>
-                <Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required />
+                <Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required={!form.is_alumni} />
               </div>
               <div>
                 <Label className="mb-2 block">LinkedIn URL</Label>
