@@ -7,6 +7,7 @@ import { labApi } from '../services/api';
 const Publications = () => {
   const [publications, setPublications] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [visibleCount, setVisibleCount] = useState(4);
 
   useEffect(() => {
     labApi.getPublications()
@@ -35,7 +36,7 @@ const Publications = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {publications.map((pub) => (
+            {publications.slice(0, visibleCount).map((pub) => (
               <Card 
                 key={pub.id} 
                 data-testid={`publication-card-${pub.id}`}
@@ -86,6 +87,17 @@ const Publications = () => {
                 </CardContent>
               </Card>
             ))}
+          </div>
+        )}
+        
+        {!loading && visibleCount < publications.length && (
+          <div className="flex justify-center mt-12">
+            <button 
+              onClick={() => setVisibleCount(prev => prev + 4)}
+              className="px-8 py-3 bg-white border-2 border-teal-600 text-teal-600 font-semibold rounded-full hover:bg-teal-50 transition-colors duration-300"
+            >
+              Load More Publications
+            </button>
           </div>
         )}
       </div>

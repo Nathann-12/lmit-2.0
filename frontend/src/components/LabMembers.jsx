@@ -6,6 +6,7 @@ import { labApi } from '../services/api';
 const LabMembers = () => {
   const [labMembers, setLabMembers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [visibleCount, setVisibleCount] = useState(6);
 
   useEffect(() => {
     labApi.getLabMembers()
@@ -34,7 +35,7 @@ const LabMembers = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {labMembers.map((member) => (
+            {labMembers.slice(0, visibleCount).map((member) => (
               <Card 
                 key={member.id} 
                 data-testid={`member-card-${member.id}`}
@@ -116,6 +117,17 @@ const LabMembers = () => {
                 </CardContent>
               </Card>
             ))}
+          </div>
+        )}
+        
+        {!loading && visibleCount < labMembers.length && (
+          <div className="flex justify-center mt-12">
+            <button 
+              onClick={() => setVisibleCount(prev => prev + 6)}
+              className="px-8 py-3 bg-white border-2 border-teal-600 text-teal-600 font-semibold rounded-full hover:bg-teal-50 transition-colors duration-300"
+            >
+              Load More Members
+            </button>
           </div>
         )}
       </div>
