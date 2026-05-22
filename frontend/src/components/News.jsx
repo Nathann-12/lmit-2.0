@@ -39,7 +39,7 @@ const News = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {news.map((item) => (
+            {news.map((item, index) => (
               <Card 
                 key={item.id} 
                 data-testid={`news-card-${item.id}`}
@@ -52,6 +52,11 @@ const News = () => {
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-900/50 to-transparent"></div>
+                  {index === 0 && (
+                    <div className="absolute top-4 right-4 bg-rose-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg animate-pulse tracking-wider">
+                      NEW
+                    </div>
+                  )}
                 </div>
 
                 <CardContent className="p-6">
