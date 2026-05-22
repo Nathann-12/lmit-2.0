@@ -92,8 +92,9 @@ const LabInfoTab = () => {
               value={data.logo_image || ''}
               onChange={(v) => setData({ ...data, logo_image: v })}
               aspect={1}
+              preserveTransparency={true}
             />
-            <p className="text-xs text-slate-500 mt-1">Upload your lab logo. It will appear in the navigation bar and footer. Square format recommended.</p>
+            <p className="text-xs text-slate-500 mt-1">Upload your lab logo. It will appear in the navigation bar and footer. Supports transparent PNG.</p>
           </div>
           <div>
             <ImageUploader

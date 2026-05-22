@@ -36,7 +36,7 @@ const createImage = (url) =>
  * @param {object} pixelCrop - { x, y, width, height } in pixel coordinates
  * @returns {string} JPEG data URL
  */
-const getCroppedImg = async (imageSrc, pixelCrop) => {
+const getCroppedImg = async (imageSrc, pixelCrop, transparent = false) => {
   const image = await createImage(imageSrc);
   const canvas = document.createElement('canvas');
 
@@ -51,19 +51,21 @@ const getCroppedImg = async (imageSrc, pixelCrop) => {
   canvas.width = outW;
   canvas.height = outH;
   const ctx = canvas.getContext('2d');
-  ctx.fillStyle = '#ffffff';
-  ctx.fillRect(0, 0, outW, outH);
+  if (!transparent) {
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, outW, outH);
+  }
   ctx.drawImage(
     image,
     pixelCrop.x, pixelCrop.y, pixelCrop.width, pixelCrop.height,
     0, 0, outW, outH,
   );
-  return canvas.toDataURL('image/jpeg', QUALITY);
+  return transparent ? canvas.toDataURL('image/png') : canvas.toDataURL('image/jpeg', QUALITY);
 };
 
 /* ---------- Component ---------- */
 
-const ImageUploader = ({ value, onChange, label = 'Image', aspect = 4 / 3 }) => {
+const ImageUploader = ({ value, onChange, label = 'Image', aspect = 4 / 3, preserveTransparency = false }) => {
   const [mode, setMode] = useState(() =>
     value && value.startsWith('data:') ? 'upload' : 'url',
   );
@@ -117,7 +119,7 @@ const ImageUploader = ({ value, onChange, label = 'Image', aspect = 4 / 3 }) => 
     if (!rawImage || !croppedAreaPixels) return;
     setProcessing(true);
     try {
-      const croppedDataUrl = await getCroppedImg(rawImage, croppedAreaPixels);
+      const croppedDataUrl = await getCroppedImg(rawImage, croppedAreaPixels, preserveTransparency);
       onChange(croppedDataUrl);
       const sizeKB = Math.round((croppedDataUrl.length * 0.75) / 1024);
       toast.success(`Image cropped & saved (${sizeKB}KB)`);
