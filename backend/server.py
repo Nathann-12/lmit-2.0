@@ -297,7 +297,7 @@ async def get_youtube_videos():
 
 @api_router.get("/news", response_model=List[NewsItem])
 async def get_news(limit: Optional[int] = None):
-    cursor = db.news.find({}, {"_id": 0}).sort("date", -1)
+    cursor = db.news.find({}, {"_id": 0}).sort([("date", -1), ("id", -1)])
     if limit:
         cursor = cursor.limit(limit)
     items = await cursor.to_list(100)
