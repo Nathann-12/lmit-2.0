@@ -1,13 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from './ui/card';
 import { Badge } from './ui/badge';
-import { Loader2 } from 'lucide-react';
+import { Loader2, ArrowRight } from 'lucide-react';
 import { labApi } from '../services/api';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from './ui/dialog';
 
 const ResearchFocus = () => {
   const [researchFocus, setResearchFocus] = useState([]);
   const [loading, setLoading] = useState(true);
   const [visibleCount, setVisibleCount] = useState(6);
+  const [selectedFocus, setSelectedFocus] = useState(null);
 
   useEffect(() => {
     labApi.getResearchFocus()
@@ -41,25 +49,26 @@ const ResearchFocus = () => {
                 <Card 
                   key={focus.id} 
                   data-testid={`research-card-${focus.id}`}
-                  className="group overflow-hidden border-gray-200 hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+                  className="group overflow-hidden border-gray-200 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer flex flex-col h-full"
+                  onClick={() => setSelectedFocus(focus)}
                 >
-                  <div className="relative h-64 overflow-hidden">
+                  <div className="relative h-64 shrink-0 overflow-hidden">
                     <img
                       src={focus.image}
                       alt={focus.title}
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent"></div>
-                    <h3 className="absolute bottom-4 left-4 text-2xl font-bold text-white">
+                    <h3 className="absolute bottom-4 left-4 text-2xl font-bold text-white pr-4">
                       {focus.title}
                     </h3>
                   </div>
 
-                  <CardContent className="p-6">
-                    <p className="text-slate-600 mb-4 leading-relaxed">
+                  <CardContent className="p-6 flex flex-col flex-grow">
+                    <p className="text-slate-600 mb-4 leading-relaxed line-clamp-3">
                       {focus.description}
                     </p>
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-wrap gap-2 mb-4 mt-auto">
                       {focus.keywords.map((keyword, index) => (
                         <Badge 
                           key={index} 
@@ -69,6 +78,9 @@ const ResearchFocus = () => {
                           {keyword}
                         </Badge>
                       ))}
+                    </div>
+                    <div className="text-teal-600 font-medium flex items-center group-hover:text-teal-700 transition-colors">
+                      Read more <ArrowRight className="w-4 h-4 ml-1 transition-transform group-hover:translate-x-1" />
                     </div>
                   </CardContent>
                 </Card>
@@ -85,6 +97,44 @@ const ResearchFocus = () => {
                 </button>
               </div>
             )}
+
+            <Dialog open={!!selectedFocus} onOpenChange={(open) => !open && setSelectedFocus(null)}>
+              <DialogContent className="max-w-3xl p-0 overflow-hidden bg-white border-0 shadow-2xl rounded-2xl">
+                {selectedFocus && (
+                  <>
+                    <div className="relative h-64 sm:h-80 w-full shrink-0">
+                      <img 
+                        src={selectedFocus.image} 
+                        alt={selectedFocus.title}
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-slate-900/20 to-transparent"></div>
+                    </div>
+                    <div className="p-6 sm:p-8 overflow-y-auto max-h-[60vh]">
+                      <DialogHeader>
+                        <DialogTitle className="text-2xl sm:text-3xl font-bold text-slate-800 mb-2">
+                          {selectedFocus.title}
+                        </DialogTitle>
+                        <div className="flex flex-wrap gap-2 mb-6">
+                          {selectedFocus.keywords.map((keyword, index) => (
+                            <Badge 
+                              key={index} 
+                              variant="secondary" 
+                              className="bg-teal-50 text-teal-700"
+                            >
+                              {keyword}
+                            </Badge>
+                          ))}
+                        </div>
+                      </DialogHeader>
+                      <DialogDescription className="text-base text-slate-600 leading-relaxed whitespace-pre-wrap mt-2">
+                        {selectedFocus.description}
+                      </DialogDescription>
+                    </div>
+                  </>
+                )}
+              </DialogContent>
+            </Dialog>
           </>
         )}
       </div>
