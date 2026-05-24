@@ -31,16 +31,17 @@ export const MagneticWrapper = ({ children, className = "" }) => {
   };
 
   return (
-    <motion.div
+    <div
       ref={ref}
       onMouseMove={handleMouseMove}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={handleMouseLeave}
-      style={{ x: smoothX, y: smoothY }}
       className={`inline-block ${className}`}
     >
-      {children}
-    </motion.div>
+      <motion.div style={{ x: smoothX, y: smoothY }}>
+        {children}
+      </motion.div>
+    </div>
   );
 };
 
