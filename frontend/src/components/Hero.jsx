@@ -59,7 +59,7 @@ const Hero = () => {
           <Loader2 className="w-12 h-12 text-white animate-spin mx-auto" />
         ) : labInfo ? (
           <div className="space-y-6">
-            <h1 className="hero-stagger hero-stagger-1 text-gradient-hero !font-black text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl leading-[1.05] tracking-[-0.03em] max-w-4xl mx-auto" data-testid="hero-title">
+            <h1 className="hero-stagger hero-stagger-1 text-gradient-hero !font-black text-3xl sm:text-4xl md:text-5xl lg:text-6xl leading-[1.1] tracking-[-0.03em] max-w-4xl mx-auto" data-testid="hero-title">
               {labInfo.name}
             </h1>
             <p className="hero-stagger hero-stagger-2 text-xl sm:text-2xl md:text-3xl text-teal-300/90 font-light max-w-3xl mx-auto tracking-wide" data-testid="hero-tagline">
