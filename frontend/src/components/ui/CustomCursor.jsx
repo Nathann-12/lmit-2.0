@@ -1,28 +1,43 @@
 import React, { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, useMotionValue, useSpring } from 'framer-motion';
 
 const CustomCursor = () => {
-  const [mousePosition, setMousePosition] = useState({ x: -100, y: -100 });
   const [isHovering, setIsHovering] = useState(false);
+  
+  // Use MotionValues instead of React state for high performance
+  const cursorX = useMotionValue(-100);
+  const cursorY = useMotionValue(-100);
+  
+  // Apply smooth spring physics directly to values
+  const springConfig = { damping: 25, stiffness: 400, mass: 0.5 };
+  const smoothX = useSpring(cursorX, springConfig);
+  const smoothY = useSpring(cursorY, springConfig);
 
   useEffect(() => {
     const updateMousePosition = (e) => {
-      setMousePosition({ x: e.clientX, y: e.clientY });
+      // Direct DOM update, NO React re-render!
+      cursorX.set(e.clientX - (isHovering ? 24 : 8));
+      cursorY.set(e.clientY - (isHovering ? 24 : 8));
     };
 
     const handleMouseOver = (e) => {
-      // Check if hovering over a clickable element
-      if (
+      const isClickable = 
         e.target.tagName.toLowerCase() === 'a' ||
         e.target.tagName.toLowerCase() === 'button' ||
         e.target.closest('a') ||
         e.target.closest('button') ||
         e.target.classList.contains('cursor-pointer') ||
-        e.target.closest('.cursor-pointer')
-      ) {
-        setIsHovering(true);
+        e.target.closest('.cursor-pointer');
+        
+      setIsHovering(isClickable);
+      
+      // Immediately adjust offset when hover state changes
+      if (isClickable) {
+        cursorX.set(e.clientX - 24);
+        cursorY.set(e.clientY - 24);
       } else {
-        setIsHovering(false);
+        cursorX.set(e.clientX - 8);
+        cursorY.set(e.clientY - 8);
       }
     };
 
@@ -37,40 +52,30 @@ const CustomCursor = () => {
       window.removeEventListener('mouseover', handleMouseOver);
       document.body.classList.remove('hide-default-cursor');
     };
-  }, []);
+  }, [cursorX, cursorY, isHovering]);
 
   const variants = {
     default: {
-      x: mousePosition.x - 8,
-      y: mousePosition.y - 8,
       height: 16,
       width: 16,
-      backgroundColor: 'rgba(13, 148, 136, 0.5)', // Teal
-      mixBlendMode: 'normal',
+      backgroundColor: 'rgba(13, 148, 136, 0.5)',
       border: '0px solid transparent'
     },
     hover: {
-      x: mousePosition.x - 24,
-      y: mousePosition.y - 24,
       height: 48,
       width: 48,
       backgroundColor: 'transparent',
-      border: '2px solid rgba(13, 148, 136, 0.8)', // Teal border
-      mixBlendMode: 'normal',
+      border: '2px solid rgba(13, 148, 136, 0.8)'
     }
   };
 
   return (
     <motion.div
       className="fixed top-0 left-0 rounded-full pointer-events-none z-[9999] hidden md:block"
+      style={{ x: smoothX, y: smoothY }}
       variants={variants}
       animate={isHovering ? "hover" : "default"}
-      transition={{ 
-        type: "spring", 
-        stiffness: 500, 
-        damping: 28, 
-        mass: 0.5 
-      }}
+      transition={{ duration: 0.15 }}
     />
   );
 };
