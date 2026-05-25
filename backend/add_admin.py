@@ -9,13 +9,14 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-MONGO_URI = os.environ.get("MONGO_URI")
+MONGO_URI = os.environ.get("MONGO_URL") or os.environ.get("MONGO_URI")
 if not MONGO_URI:
-    print("Error: MONGO_URI not found in environment variables.")
+    print("Error: MONGO_URL not found in environment variables.")
     sys.exit(1)
 
 client = AsyncIOMotorClient(MONGO_URI)
-db = client.get_database()
+db_name = os.environ.get("DB_NAME", "lmit")
+db = client[db_name]
 
 def hash_password(password: str) -> str:
     salt = bcrypt.gensalt()
