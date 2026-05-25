@@ -310,14 +310,3 @@ code {
     transform: translateX(100%);
   }
 }
-.hide-default-cursor {
-  cursor: none !important;
-}
-.hide-default-cursor a,
-.hide-default-cursor button,
-.hide-default-cursor input,
-.hide-default-cursor textarea,
-.hide-default-cursor select,
-.hide-default-cursor .cursor-pointer {
-  cursor: none !important;
-}

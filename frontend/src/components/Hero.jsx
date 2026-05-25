@@ -44,13 +44,6 @@ const Hero = () => {
         <div className="absolute inset-0 bg-slate-950/85"></div>
       </motion.div>
 
-      {/* Glowing Orbs for Premium Aesthetic */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
-        <div className="absolute top-1/4 left-1/4 w-[30rem] h-[30rem] bg-teal-500/15 rounded-full blur-[100px] animate-float-orb"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-[35rem] h-[35rem] bg-indigo-500/10 rounded-full blur-[120px] animate-float-orb" style={{ animationDelay: '-5s' }}></div>
-        <div className="absolute top-1/2 left-1/2 w-[25rem] h-[25rem] bg-cyan-500/8 rounded-full blur-[80px] animate-float-orb" style={{ animationDelay: '-10s' }}></div>
-      </div>
-
       {/* Content */}
       <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center pointer-events-none">
         {loading ? (
