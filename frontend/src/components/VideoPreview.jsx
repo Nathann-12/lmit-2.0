@@ -96,10 +96,8 @@ const VideoPreview = () => {
                     );
                   })}
                 </CarouselContent>
-                <div className="hidden md:flex justify-end gap-2 mt-6 pr-6">
-                  <CarouselPrevious className="static translate-y-0 h-10 w-10 border-teal-200 text-teal-600 hover:bg-teal-50 hover:text-teal-700" />
-                  <CarouselNext className="static translate-y-0 h-10 w-10 border-teal-200 text-teal-600 hover:bg-teal-50 hover:text-teal-700" />
-                </div>
+                <CarouselPrevious className="hidden md:flex absolute -left-12 top-1/2 -translate-y-1/2 h-12 w-12 border-teal-200 text-teal-600 hover:bg-teal-50 hover:text-teal-700 bg-white/90 backdrop-blur-sm shadow-md z-10" />
+                <CarouselNext className="hidden md:flex absolute -right-12 top-1/2 -translate-y-1/2 h-12 w-12 border-teal-200 text-teal-600 hover:bg-teal-50 hover:text-teal-700 bg-white/90 backdrop-blur-sm shadow-md z-10" />
               </Carousel>
             </div>
           </ScrollReveal>
