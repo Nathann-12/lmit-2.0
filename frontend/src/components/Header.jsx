@@ -44,15 +44,18 @@ const Header = () => {
       <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center w-full">
           {/* Logo/Brand */}
-          <div className="flex-shrink-0 flex items-center gap-3">
+          <div 
+            className="flex-shrink-0 flex items-center gap-3 cursor-pointer group"
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          >
             {labInfo?.logo_image && (
               <img 
                 src={labInfo.logo_image} 
                 alt="Lab Logo" 
-                className="h-10 sm:h-12 w-auto object-contain rounded transition-all duration-300"
+                className="h-10 sm:h-12 w-auto object-contain rounded transition-all duration-300 group-hover:opacity-80"
               />
             )}
-            <h1 className={`text-lg sm:text-xl font-bold leading-tight transition-all duration-500 ${
+            <h1 className={`text-lg sm:text-xl font-bold leading-tight transition-all duration-500 group-hover:text-teal-400 ${
               isScrolled ? 'text-slate-800' : 'text-white'
             }`}>
               {siteName}
