@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from './ui/card';
 import { Mail, Linkedin, GraduationCap, Loader2, FileText, Briefcase } from 'lucide-react';
 import { labApi } from '../services/api';
@@ -148,16 +148,27 @@ const LabMembers = () => {
               ))}
             </div>
             
-            {visibleCount < currentMembers.length && (
-              <div className="flex justify-center mb-16">
+            <div className="flex flex-col items-center gap-4 mb-16">
+              {visibleCount < currentMembers.length && (
                 <button 
                   onClick={() => setVisibleCount(prev => prev + 6)}
-                  className="px-8 py-3 bg-white border-2 border-teal-600 text-teal-600 font-semibold rounded-full hover:bg-teal-50 transition-colors duration-300"
+                  className="px-8 py-3 bg-white border-2 border-teal-600 text-teal-600 font-semibold rounded-full hover:bg-teal-50 transition-colors duration-300 shadow-sm"
                 >
                   Load More Members
                 </button>
-              </div>
-            )}
+              )}
+              {visibleCount > 6 && (
+                <button 
+                  onClick={() => {
+                    setVisibleCount(6);
+                    document.getElementById('team')?.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                  className="text-sm font-medium text-slate-400 hover:text-slate-600 transition-colors duration-300 flex items-center gap-1"
+                >
+                  Show Less ⬆
+                </button>
+              )}
+            </div>
 
             {/* Alumni Section */}
             {alumni.length > 0 && (
@@ -190,16 +201,24 @@ const LabMembers = () => {
                   ))}
                 </div>
 
-                {visibleAlumniCount < alumni.length && (
-                  <div className="flex justify-center mt-8">
+                <div className="flex flex-col items-center gap-3 mt-8">
+                  {visibleAlumniCount < alumni.length && (
                     <button 
                       onClick={() => setVisibleAlumniCount(prev => prev + 12)}
                       className="text-sm font-semibold text-slate-500 hover:text-slate-800 transition-colors duration-200"
                     >
-                      Show More Alumni â¬‡
+                      Show More Alumni ⬇
                     </button>
-                  </div>
-                )}
+                  )}
+                  {visibleAlumniCount > 12 && (
+                    <button 
+                      onClick={() => setVisibleAlumniCount(12)}
+                      className="text-sm font-medium text-slate-400 hover:text-slate-600 transition-colors duration-200"
+                    >
+                      Show Less ⬆
+                    </button>
+                  )}
+                </div>
               </div>
             )}
           </>

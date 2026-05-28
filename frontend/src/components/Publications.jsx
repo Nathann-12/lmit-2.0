@@ -118,16 +118,27 @@ const Publications = () => {
           </div>
         )}
         
-        {!loading && visibleCount < publications.length && (
-          <div className="flex justify-center mt-12">
+        <div className="flex flex-col items-center gap-4 mt-12">
+          {visibleCount < publications.length && (
             <button 
               onClick={() => setVisibleCount(prev => prev + 4)}
-              className="px-8 py-3 bg-white border-2 border-teal-600 text-teal-600 font-semibold rounded-full hover:bg-teal-50 transition-colors duration-300"
+              className="px-8 py-3 bg-white border-2 border-teal-600 text-teal-600 font-semibold rounded-full hover:bg-teal-50 transition-colors duration-300 shadow-sm"
             >
               Load More Publications
             </button>
-          </div>
-        )}
+          )}
+          {visibleCount > 4 && (
+            <button 
+              onClick={() => {
+                setVisibleCount(4);
+                document.getElementById('publications')?.scrollIntoView({ behavior: 'smooth' });
+              }}
+              className="text-sm font-medium text-slate-400 hover:text-slate-600 transition-colors duration-300 flex items-center gap-1"
+            >
+              Show Less ⬆
+            </button>
+          )}
+        </div>
       </div>
     </section>
   );

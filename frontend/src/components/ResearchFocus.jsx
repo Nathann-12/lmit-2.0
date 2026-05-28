@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from './ui/card';
 import { Badge } from './ui/badge';
 import { Loader2, ArrowRight } from 'lucide-react';
@@ -94,16 +94,27 @@ const ResearchFocus = () => {
               ))}
             </div>
 
-            {visibleCount < researchFocus.length && (
-              <div className="flex justify-center mt-12">
+            <div className="flex flex-col items-center gap-4 mt-12">
+              {visibleCount < researchFocus.length && (
                 <button 
                   onClick={() => setVisibleCount(prev => prev + 6)}
-                  className="px-8 py-3 bg-white border-2 border-teal-600 text-teal-600 font-semibold rounded-full hover:bg-teal-50 transition-colors duration-300"
+                  className="px-8 py-3 bg-white border-2 border-teal-600 text-teal-600 font-semibold rounded-full hover:bg-teal-50 transition-colors duration-300 shadow-sm"
                 >
                   Load More Research
                 </button>
-              </div>
-            )}
+              )}
+              {visibleCount > 6 && (
+                <button 
+                  onClick={() => {
+                    setVisibleCount(6);
+                    document.getElementById('research')?.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                  className="text-sm font-medium text-slate-400 hover:text-slate-600 transition-colors duration-300 flex items-center gap-1"
+                >
+                  Show Less ⬆
+                </button>
+              )}
+            </div>
 
             <Dialog open={!!selectedFocus} onOpenChange={(open) => !open && setSelectedFocus(null)}>
               <DialogContent className="max-w-3xl p-0 overflow-hidden bg-white border-0 shadow-2xl rounded-2xl">
