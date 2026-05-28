@@ -11,7 +11,7 @@ export const ScrollReveal = ({ children, className = '', delay = 0, yOffset = 50
       className={className}
       initial={{ opacity: 0, y: yStart, x: xStart }}
       whileInView={{ opacity: 1, y: 0, x: 0 }}
-      viewport={{ once: true, margin: "-50px" }}
+      viewport={{ once: false, margin: "-50px" }}
       transition={{ 
         duration: 0.6, 
         delay: delay / 1000, 
