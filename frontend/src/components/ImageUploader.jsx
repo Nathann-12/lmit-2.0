@@ -1,10 +1,11 @@
 import React, { useState, useRef, useCallback } from 'react';
-import Cropper from 'react-easy-crop';
+import ReactCrop, { centerCrop, makeAspectCrop } from 'react-image-crop';
+import 'react-image-crop/dist/ReactCrop.css';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from './ui/dialog';
-import { Upload, Link2, X, Loader2, ImageIcon, Crop, ZoomIn } from 'lucide-react';
+import { Upload, Link2, X, Loader2, ImageIcon, Crop, Unlock, Lock } from 'lucide-react';
 import { toast } from 'sonner';
 
 const MAX_WIDTH = 1200;
@@ -21,23 +22,13 @@ const readFileAsDataUrl = (file) =>
     reader.readAsDataURL(file);
   });
 
-const createImage = (url) =>
-  new Promise((resolve, reject) => {
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.onerror = () => reject(new Error('Invalid image'));
-    img.onload = () => resolve(img);
-    img.src = url;
-  });
-
 /**
  * Crop, resize, and compress the image.
- * @param {string} imageSrc - data URL or http URL of the source image
+ * @param {HTMLImageElement} image - source image element
  * @param {object} pixelCrop - { x, y, width, height } in pixel coordinates
  * @returns {string} JPEG data URL
  */
-const getCroppedImg = async (imageSrc, pixelCrop, transparent = false) => {
-  const image = await createImage(imageSrc);
+const getCroppedImg = async (image, pixelCrop, transparent = false) => {
   const canvas = document.createElement('canvas');
 
   // Determine final dimensions (respect MAX_WIDTH)
@@ -51,15 +42,18 @@ const getCroppedImg = async (imageSrc, pixelCrop, transparent = false) => {
   canvas.width = outW;
   canvas.height = outH;
   const ctx = canvas.getContext('2d');
+  
   if (!transparent) {
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, 0, outW, outH);
   }
+  
   ctx.drawImage(
     image,
     pixelCrop.x, pixelCrop.y, pixelCrop.width, pixelCrop.height,
     0, 0, outW, outH,
   );
+  
   return transparent ? canvas.toDataURL('image/png') : canvas.toDataURL('image/jpeg', QUALITY);
 };
 
@@ -71,17 +65,71 @@ const ImageUploader = ({ value, onChange, label = 'Image', aspect = 4 / 3, prese
   );
   const [processing, setProcessing] = useState(false);
   const fileInputRef = useRef(null);
+  const imgRef = useRef(null);
 
   // Crop modal state
   const [cropModalOpen, setCropModalOpen] = useState(false);
   const [rawImage, setRawImage] = useState(null);      // source image for cropper
-  const [crop, setCrop] = useState({ x: 0, y: 0 });
-  const [zoom, setZoom] = useState(1);
-  const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
+  const [crop, setCrop] = useState();
+  const [completedCrop, setCompletedCrop] = useState(null);
+  const [isFreeCrop, setIsFreeCrop] = useState(false);
 
-  const onCropComplete = useCallback((_area, areaPixels) => {
-    setCroppedAreaPixels(areaPixels);
-  }, []);
+  const onImageLoad = useCallback((e) => {
+    const { width, height } = e.currentTarget;
+    const currentAspect = isFreeCrop ? undefined : aspect;
+    
+    let initialCrop;
+    if (currentAspect) {
+      initialCrop = centerCrop(
+        makeAspectCrop(
+          {
+            unit: '%',
+            width: 90,
+          },
+          currentAspect,
+          width,
+          height
+        ),
+        width,
+        height
+      );
+    } else {
+      // Free crop defaults to full image minus a small margin
+      initialCrop = {
+        unit: '%',
+        width: 90,
+        height: 90,
+        x: 5,
+        y: 5
+      };
+    }
+    
+    setCrop(initialCrop);
+  }, [aspect, isFreeCrop]);
+
+  const toggleFreeCrop = () => {
+    setIsFreeCrop(!isFreeCrop);
+    if (!imgRef.current) return;
+    
+    // Recalculate crop based on new aspect setting
+    const { width, height } = imgRef.current;
+    const currentAspect = !isFreeCrop ? undefined : aspect; // toggling to the opposite
+    
+    if (currentAspect) {
+      setCrop(
+        centerCrop(
+          makeAspectCrop(
+            { unit: '%', width: 90 },
+            currentAspect,
+            width,
+            height
+          ),
+          width,
+          height
+        )
+      );
+    }
+  };
 
   /* --- Open cropper for a file --- */
   const handleFile = async (file) => {
@@ -97,8 +145,9 @@ const ImageUploader = ({ value, onChange, label = 'Image', aspect = 4 / 3, prese
     try {
       const dataUrl = await readFileAsDataUrl(file);
       setRawImage(dataUrl);
-      setCrop({ x: 0, y: 0 });
-      setZoom(1);
+      setIsFreeCrop(false);
+      setCrop(undefined);
+      setCompletedCrop(null);
       setCropModalOpen(true);
     } catch (err) {
       toast.error(err.message || 'Failed to read image');
@@ -109,17 +158,22 @@ const ImageUploader = ({ value, onChange, label = 'Image', aspect = 4 / 3, prese
   const openCropForExisting = () => {
     if (!value) return;
     setRawImage(value);
-    setCrop({ x: 0, y: 0 });
-    setZoom(1);
+    setIsFreeCrop(false);
+    setCrop(undefined);
+    setCompletedCrop(null);
     setCropModalOpen(true);
   };
 
   /* --- Confirm crop --- */
   const handleCropConfirm = async () => {
-    if (!rawImage || !croppedAreaPixels) return;
+    if (!imgRef.current || !completedCrop || completedCrop.width === 0 || completedCrop.height === 0) {
+      toast.error('Please select a valid crop area');
+      return;
+    }
+    
     setProcessing(true);
     try {
-      const croppedDataUrl = await getCroppedImg(rawImage, croppedAreaPixels, preserveTransparency);
+      const croppedDataUrl = await getCroppedImg(imgRef.current, completedCrop, preserveTransparency);
       onChange(croppedDataUrl);
       const sizeKB = Math.round((croppedDataUrl.length * 0.75) / 1024);
       toast.success(`Image cropped & saved (${sizeKB}KB)`);
@@ -250,51 +304,53 @@ const ImageUploader = ({ value, onChange, label = 'Image', aspect = 4 / 3, prese
 
       {/* ===== Crop Modal ===== */}
       <Dialog open={cropModalOpen} onOpenChange={(open) => { if (!open) { setCropModalOpen(false); setRawImage(null); } }}>
-        <DialogContent className="max-w-2xl p-0 overflow-hidden">
-          <DialogHeader className="px-6 pt-6 pb-0">
-            <DialogTitle className="flex items-center gap-2">
+        <DialogContent className="max-w-3xl p-0 overflow-hidden bg-slate-50">
+          <DialogHeader className="px-6 pt-6 pb-2 border-b border-slate-200 flex flex-row items-center justify-between">
+            <DialogTitle className="flex items-center gap-2 m-0">
               <Crop size={20} className="text-teal-600" /> Crop Image
             </DialogTitle>
+            
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={toggleFreeCrop}
+              className={`flex items-center gap-2 ${isFreeCrop ? 'border-amber-400 text-amber-600 hover:bg-amber-50' : 'border-slate-300'}`}
+              title={isFreeCrop ? "Lock to recommended shape" : "Unlock for free cropping"}
+            >
+              {isFreeCrop ? <Unlock size={14} /> : <Lock size={14} />}
+              {isFreeCrop ? "Free Crop (Unlocked)" : "Fixed Shape (Locked)"}
+            </Button>
           </DialogHeader>
 
-          <div className="relative w-full bg-slate-900" style={{ height: '400px' }}>
+          <div className="relative w-full bg-slate-900/5 flex items-center justify-center p-4 min-h-[300px] max-h-[60vh] overflow-y-auto">
             {rawImage && (
-              <Cropper
-                image={rawImage}
+              <ReactCrop
                 crop={crop}
-                zoom={zoom}
-                aspect={aspect}
-                onCropChange={setCrop}
-                onZoomChange={setZoom}
-                onCropComplete={onCropComplete}
-              />
+                onChange={(c, percentCrop) => setCrop(c)}
+                onComplete={(c) => setCompletedCrop(c)}
+                aspect={isFreeCrop ? undefined : aspect}
+                className="max-h-full"
+              >
+                <img 
+                  ref={imgRef}
+                  alt="Crop preview" 
+                  src={rawImage} 
+                  onLoad={onImageLoad}
+                  className="max-h-[50vh] w-auto object-contain shadow-sm"
+                />
+              </ReactCrop>
             )}
           </div>
 
-          {/* Zoom slider */}
-          <div className="px-6 py-3 flex items-center gap-3 bg-slate-50 border-t border-slate-200">
-            <ZoomIn size={16} className="text-slate-500" />
-            <input
-              type="range"
-              min={1}
-              max={3}
-              step={0.05}
-              value={zoom}
-              onChange={(e) => setZoom(Number(e.target.value))}
-              className="flex-1 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-teal-600"
-            />
-            <span className="text-xs text-slate-500 w-10 text-right">{Math.round(zoom * 100)}%</span>
-          </div>
-
-          <DialogFooter className="px-6 pb-6 pt-2">
-            <Button type="button" variant="outline" onClick={() => { setCropModalOpen(false); setRawImage(null); }}>
+          <DialogFooter className="px-6 py-4 bg-white border-t border-slate-200">
+            <Button type="button" variant="ghost" onClick={() => { setCropModalOpen(false); setRawImage(null); }}>
               Cancel
             </Button>
             <Button
               type="button"
               onClick={handleCropConfirm}
-              disabled={processing}
-              className="bg-teal-600 hover:bg-teal-700 text-white"
+              disabled={processing || !completedCrop?.width}
+              className="bg-teal-600 hover:bg-teal-700 text-white min-w-[120px]"
             >
               {processing ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Cropping...</> : 'Confirm Crop'}
             </Button>
